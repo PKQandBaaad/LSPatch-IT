@@ -5,8 +5,12 @@ plugins {
 }
 
 android {
+    compileSdk = 34
+    
     defaultConfig {
         multiDexEnabled = false
+        minSdk = 28
+        targetSdk = 34
     }
 
     buildTypes {
@@ -15,6 +19,12 @@ android {
             proguardFiles("proguard-rules.pro")
         }
     }
+    
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    
     namespace = "org.lsposed.lspatch.metaloader"
 }
 
