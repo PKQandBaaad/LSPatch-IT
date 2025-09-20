@@ -18,10 +18,6 @@ android {
             isMinifyEnabled = true
             proguardFiles("proguard-rules.pro")
         }
-        debug {
-            isMinifyEnabled = true
-            proguardFiles("proguard-rules.pro")
-        }
     }
     
     compileOptions {
@@ -49,6 +45,23 @@ android {
         includeInApk = false
         includeInBundle = false
     }
+}
+
+// Exclude share:java from Jetifier processing
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.module.name == "java") {
+                useVersion("1.0")
+            }
+        }
+    }
+}
+
+dependencies {
+    compileOnly(projects.hiddenapi.stubs)
+    implementation(projects.share.java)
+    implementation(libs.hiddenapibypass)
 }
 
 androidComponents.onVariants { variant ->

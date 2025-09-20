@@ -60,6 +60,15 @@ val androidTargetCompatibility by extra(JavaVersion.VERSION_21)
 // Fix for JDK image transform issues
 val androidJdkImageTransformDisabled by extra(true)
 
+// Add support for Java 21 in Jetifier
+tasks.withType<JavaCompile> {
+    options.compilerArgs.addAll(
+        listOf(
+            "--release", "21"
+        )
+    )
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
