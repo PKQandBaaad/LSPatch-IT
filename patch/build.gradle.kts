@@ -17,7 +17,7 @@ java {
 }
 
 dependencies {
-    implementation(projects.axml)
+    implementation(libs.axml)
     implementation(projects.apkzlib)
     implementation(projects.share.java)
 

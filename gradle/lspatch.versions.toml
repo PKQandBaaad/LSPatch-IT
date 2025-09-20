@@ -59,3 +59,5 @@ commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 beust-jcommander = { module = "com.beust:jcommander", version.ref = "beust-jcommander" }
 
 google-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson" }
+
+axml = { module = "de.upb.cs.swt:axml", version = "2.1.3" }
