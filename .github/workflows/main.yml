@@ -18,6 +18,8 @@ jobs:
       CCACHE_NOHASHDIR: 'true'
       CCACHE_HARDLINK: 'true'
       CCACHE_BASEDIR: '${{ github.workspace }}'
+      # Fix for JDK image transform issues
+      ANDROID_JDK_IMAGE_TRANSFORM_DISABLED: 'true'
 
     steps:
     - name: Checkout

@@ -57,6 +57,9 @@ val androidBuildToolsVersion by extra("34.0.0")
 val androidSourceCompatibility by extra(JavaVersion.VERSION_21)
 val androidTargetCompatibility by extra(JavaVersion.VERSION_21)
 
+// Fix for JDK image transform issues
+val androidJdkImageTransformDisabled by extra(true)
+
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }

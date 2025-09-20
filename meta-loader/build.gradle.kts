@@ -18,6 +18,10 @@ android {
             isMinifyEnabled = true
             proguardFiles("proguard-rules.pro")
         }
+        debug {
+            isMinifyEnabled = true
+            proguardFiles("proguard-rules.pro")
+        }
     }
     
     compileOptions {
@@ -25,7 +29,26 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
     
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes += "/META-INF/**"
+            excludes += "/kotlin/**"
+            excludes += "/okhttp3/**"
+            excludes += "/*.txt"
+            excludes += "/*.bin"
+        }
+    }
+    
     namespace = "org.lsposed.lspatch.metaloader"
+    
+    // Fix for JDK image transform issues
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 androidComponents.onVariants { variant ->
