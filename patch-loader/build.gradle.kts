@@ -15,11 +15,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-        debug {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -44,9 +40,11 @@ androidComponents.onVariants { variant ->
 
     task<Copy>("copySo$variantCapped") {
         dependsOn("assemble$variantCapped")
+        dependsOn("strip${variantCapped}DebugSymbols")
+        val libDir = variant.name + "/strip${variantCapped}DebugSymbols"
         from(
             fileTree(
-                "dir" to "$buildDir/intermediates/stripped_native_libs/${variant.name}/out/lib",
+                "dir" to "$buildDir/intermediates/stripped_native_libs/$libDir/out/lib",
                 "include" to listOf("**/liblspatch.so")
             )
         )

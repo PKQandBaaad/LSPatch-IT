@@ -9,6 +9,7 @@ val coreVerName: String by rootProject.extra
 
 plugins {
     alias(libs.plugins.agp.app)
+    alias(lspatch.plugins.compose.compiler)
     alias(lspatch.plugins.google.devtools.ksp)
     alias(lspatch.plugins.rikka.tools.refine)
     alias(lspatch.plugins.kotlin.android)
@@ -25,10 +26,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            isMinifyEnabled = true
-            proguardFiles("proguard-rules-debug.pro")
-        }
         release {
             isMinifyEnabled = true
             proguardFiles(
@@ -41,21 +38,13 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    kotlin {
-        jvmToolchain(17)
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
 
     namespace = "org.lsposed.lspatch"

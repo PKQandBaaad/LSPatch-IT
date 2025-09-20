@@ -31,7 +31,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "LSPatch"
 include(
+    ":apache",
     ":apkzlib",
+    ":axml",
     ":core",
     ":hiddenapi:bridge",
     ":hiddenapi:stubs",
@@ -47,6 +49,8 @@ include(
     ":share:java",
 )
 
+project(":apache").projectDir = file("core/apache")
+project(":axml").projectDir = file("core/axml")
 project(":core").projectDir = file("core/core")
 project(":hiddenapi:bridge").projectDir = file("core/hiddenapi/bridge")
 project(":hiddenapi:stubs").projectDir = file("core/hiddenapi/stubs")

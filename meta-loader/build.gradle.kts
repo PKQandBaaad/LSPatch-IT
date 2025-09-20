@@ -5,12 +5,8 @@ plugins {
 }
 
 android {
-    compileSdk = 34
-    
     defaultConfig {
         multiDexEnabled = false
-        minSdk = 28
-        targetSdk = 34
     }
 
     buildTypes {
@@ -19,49 +15,7 @@ android {
             proguardFiles("proguard-rules.pro")
         }
     }
-    
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    
-    packaging {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-        resources {
-            excludes += "/META-INF/**"
-            excludes += "/kotlin/**"
-            excludes += "/okhttp3/**"
-            excludes += "/*.txt"
-            excludes += "/*.bin"
-        }
-    }
-    
     namespace = "org.lsposed.lspatch.metaloader"
-    
-    // Fix for JDK image transform issues
-    dependenciesInfo {
-        includeInApk = false
-        includeInBundle = false
-    }
-}
-
-// Exclude share:java from Jetifier processing
-configurations.all {
-    resolutionStrategy {
-        eachDependency {
-            if (requested.module.name == "java") {
-                useVersion("1.0")
-            }
-        }
-    }
-}
-
-dependencies {
-    compileOnly(projects.hiddenapi.stubs)
-    implementation(projects.share.java)
-    implementation(libs.hiddenapibypass)
 }
 
 androidComponents.onVariants { variant ->

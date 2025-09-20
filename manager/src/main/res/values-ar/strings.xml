@@ -67,7 +67,7 @@
     <string name="patch_uninstall_text">نظرًا لاختلاف التوقيعات، يلزمك إلغاء تثبيت التطبيق الأصلي قبل تثبيت التطبيق المعدل.\nتأكد من عمل نسخة احتياطية من البيانات الشخصية.</string>
     <string name="patch_install_successfully">تم التثبيت بنجاح</string>
     <string name="patch_install_failed">فشل التثبيت</string>
-    <string name="patch_no_xposed_module"></string>
+    <string name="patch_no_xposed_module">No Xposed module(s) were found</string>
     <!-- Select Apps Screen -->
     <string name="screen_select_apps">تحديد التطبيقات</string>
     <!-- Settings Screen -->
@@ -86,4 +86,6 @@
     <string name="settings_keystore_wrong_alias">اسم مستعار خاطئ</string>
     <string name="settings_keystore_wrong_alias_password">كلمة مرور الاسم المستعار خاطئة</string>
     <string name="settings_detail_patch_logs">تفاصيل سجلات التعديل</string>
+    <string name="patch_inject_dex">حقن ديكس</string>
+    <string name="patch_inject_dex_desc">بالنسبة للتطبيقات ذات الخدمات المعزولة، مثل محركات عرض المتصفحات، يرجى تشغيل هذا الخيار للتأكد من أنها تعمل بشكل صحيح.</string>
 </resources>

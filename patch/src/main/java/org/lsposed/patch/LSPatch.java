@@ -46,7 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LSPatch {
 
@@ -77,6 +77,9 @@ public class LSPatch {
 
     @Parameter(names = {"-l", "--sigbypasslv"}, description = "Signature bypass level. 0 (disable), 1 (pm), 2 (pm+openat). default 0")
     private int sigbypassLevel = 0;
+
+    @Parameter(names = {"--injectdex"}, description = "Inject directly the loder dex file into the original application package")
+    private boolean injectDex = false;
 
     @Parameter(names = {"-k", "--keystore"}, arity = 4, description = "Set custom signature keystore. Followed by 4 arguments: keystore path, keystore password, keystore alias, keystore alias password")
     private List<String> keystoreArgs = Arrays.asList(null, "123456", "key0", "123456");
@@ -207,7 +210,7 @@ public class LSPatch {
 
             String originalSignature = null;
             if (sigbypassLevel > 0) {
-                originalSignature  = ApkSignatureHelper.getApkSignInfo(srcApkFile.getAbsolutePath());
+                originalSignature = ApkSignatureHelper.getApkSignInfo(srcApkFile.getAbsolutePath());
                 if (originalSignature == null || originalSignature.isEmpty()) {
                     throw new PatchError("get original signature failed");
                 }
@@ -232,6 +235,19 @@ public class LSPatch {
                 logger.d("original minSdkVersion: " + minSdkVersion);
             }
 
+            final boolean skipSplit = apkPaths.size() > 1 && srcApkFile.getName().startsWith("split_") && appComponentFactory == null;
+            if (skipSplit) {
+                logger.i("Packing split apk...");
+                for (StoredEntry entry : srcZFile.entries()) {
+                    String name = entry.getCentralDirectoryHeader().getName();
+                    if (dstZFile.get(name) != null) continue;
+                    if (name.startsWith("META-INF") && (name.endsWith(".SF") || name.endsWith(".MF") || name.endsWith(".RSA")))
+                        continue;
+                    srcZFile.addFileLink(name, name);
+                }
+                return;
+            }
+
             logger.i("Patching apk...");
             // modify manifest
             final var config = new PatchConfig(useManager, debuggableFlag, overrideVersionCode, sigbypassLevel, originalSignature, appComponentFactory);
@@ -253,7 +269,15 @@ public class LSPatch {
 
             logger.i("Adding metaloader dex...");
             try (var is = getClass().getClassLoader().getResourceAsStream(Constants.META_LOADER_DEX_ASSET_PATH)) {
-                dstZFile.add("classes.dex", is);
+                if (!injectDex) {
+                    dstZFile.add("classes.dex", is);
+                } else {
+                    var dexCount = srcZFile.entries().stream().filter(entry -> {
+                        var name = entry.getCentralDirectoryHeader().getName();
+                        return name.startsWith("classes") && name.endsWith(".dex");
+                    }).collect(Collectors.toList()).size() + 1;
+                    dstZFile.add("classes" + dexCount + ".dex", is);
+                }
             } catch (Throwable e) {
                 throw new PatchError("Error when adding dex", e);
             }
@@ -289,8 +313,8 @@ public class LSPatch {
 
             for (StoredEntry entry : srcZFile.entries()) {
                 String name = entry.getCentralDirectoryHeader().getName();
-                if (name.startsWith("classes") && name.endsWith(".dex")) continue;
                 if (dstZFile.get(name) != null) continue;
+                if (!injectDex && name.startsWith("classes") && name.endsWith(".dex")) continue;
                 if (name.equals("AndroidManifest.xml")) continue;
                 if (name.startsWith("META-INF") && (name.endsWith(".SF") || name.endsWith(".MF") || name.endsWith(".RSA"))) continue;
                 srcZFile.addFileLink(name, name);
@@ -326,7 +350,7 @@ public class LSPatch {
         if (overrideVersionCode)
             property.addManifestAttribute(new AttributeItem(NodeValue.Manifest.VERSION_CODE, 1));
         if (minSdkVersion < 28)
-            property.addUsesSdkAttribute(new AttributeItem(NodeValue.UsesSDK.MIN_SDK_VERSION, "28"));
+            property.addUsesSdkAttribute(new AttributeItem(NodeValue.UsesSDK.MIN_SDK_VERSION, 28));
         property.addApplicationAttribute(new AttributeItem(NodeValue.Application.DEBUGGABLE, debuggableFlag));
         property.addApplicationAttribute(new AttributeItem("appComponentFactory", PROXY_APP_COMPONENT_FACTORY));
         property.addMetaData(new ModificationProperty.MetaData("lspatch", metadata));

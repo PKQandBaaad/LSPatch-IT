@@ -4,10 +4,12 @@ import com.android.build.gradle.BaseExtension
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.internal.storage.file.FileRepository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import com.android.build.gradle.LibraryExtension
 
 plugins {
     alias(libs.plugins.agp.lib) apply false
     alias(libs.plugins.agp.app) apply false
+    alias(lspatch.plugins.compose.compiler) apply false
     alias(lspatch.plugins.kotlin.android) apply false
 }
 
@@ -17,7 +19,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.eclipse.jgit:org.eclipse.jgit:6.3.0.202209071007-r")
+        classpath("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r")
     }
 }
 
@@ -42,35 +44,23 @@ val (coreCommitCount, coreLatestTag) = FileRepositoryBuilder().setGitDir(rootPro
         }
     }.getOrNull() ?: (1 to "1.0")
 
-// sync from https://github.com/LSPosed/LSPosed/blob/master/build.gradle.kts
+// sync from https://github.com/JingMatrix/LSPosed/blob/master/build.gradle.kts
 val defaultManagerPackageName by extra("org.lsposed.lspatch")
-val apiCode by extra(100)
+val apiCode by extra(93)
 val verCode by extra(commitCount)
-val verName by extra("0.6-it")
+val verName by extra("0.7")
 val coreVerCode by extra(coreCommitCount)
 val coreVerName by extra(coreLatestTag)
 val androidMinSdkVersion by extra(28)
-val androidTargetSdkVersion by extra(34)
-val androidCompileSdkVersion by extra(34)
-val androidCompileNdkVersion by extra("25.2.9519653")
-val androidBuildToolsVersion by extra("34.0.0")
+val androidTargetSdkVersion by extra(36)
+val androidCompileSdkVersion by extra(36)
+val androidCompileNdkVersion by extra("29.0.13113456")
+val androidBuildToolsVersion by extra("36.0.0")
 val androidSourceCompatibility by extra(JavaVersion.VERSION_21)
 val androidTargetCompatibility by extra(JavaVersion.VERSION_21)
 
-// Fix for JDK image transform issues
-val androidJdkImageTransformDisabled by extra(true)
-
-// Add support for Java 21 in Jetifier
-tasks.withType<JavaCompile> {
-    options.compilerArgs.addAll(
-        listOf(
-            "--release", "21"
-        )
-    )
-}
-
 tasks.register<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(layout.buildDirectory)
 }
 
 listOf("Debug", "Release").forEach { variant ->
@@ -92,7 +82,8 @@ fun Project.configureBaseExtension() {
         buildToolsVersion = androidBuildToolsVersion
 
         externalNativeBuild.cmake {
-            version = "3.22.1+"
+            version = "3.28.1+"
+            buildStagingDirectory = layout.buildDirectory.get().asFile
         }
 
         defaultConfig {
@@ -133,7 +124,7 @@ fun Project.configureBaseExtension() {
                     cppFlags("-std=c++20", *flags)
                     cFlags("-std=c18", *flags)
                     arguments(
-                        "-DANDROID_STL=none",
+                        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
                         "-DVERSION_CODE=$verCode",
                         "-DVERSION_NAME=$verName",
                     )
@@ -213,6 +204,7 @@ fun Project.configureBaseExtension() {
                 "intermediates",
                 "optimized_processed_res",
                 "release",
+                "optimizeReleaseResources",
                 "resources-release-optimize.ap_"
             )
             val optimized = File("${zip}.opt")
@@ -246,5 +238,19 @@ subprojects {
     }
     plugins.withId("com.android.library") {
         configureBaseExtension()
+    }
+}
+
+
+project(":core") {
+    afterEvaluate {
+        if (property("android") is LibraryExtension) {
+            val android = property("android") as LibraryExtension
+            android.run {
+                buildTypes {
+                    release { proguardFiles(rootProject.file("share/lspatch-rules.pro")) }
+                }
+            }
+        }
     }
 }
